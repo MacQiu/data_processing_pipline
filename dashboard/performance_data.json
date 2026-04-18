@@ -1,0 +1,826 @@
+{
+  "last_updated": "2026-04-18T18:16:18",
+  "files_processed": [
+    "2026年2月一线考核.xlsx"
+  ],
+  "office_scores": {
+    "物业分公司": [
+      {
+        "year": 2026,
+        "month": 2,
+        "mark": 88.2,
+        "result": "A"
+      }
+    ],
+    "总经理助理": [
+      {
+        "year": 2026,
+        "month": 2,
+        "mark": 87.58,
+        "result": "B"
+      }
+    ],
+    "高新分公司": [
+      {
+        "year": 2026,
+        "month": 2,
+        "mark": 87.5,
+        "result": "B"
+      }
+    ],
+    "综合办公室": [
+      {
+        "year": 2026,
+        "month": 2,
+        "mark": 87.38,
+        "result": "B"
+      }
+    ],
+    "投资拓展部": [
+      {
+        "year": 2026,
+        "month": 2,
+        "mark": 87.25,
+        "result": "B"
+      }
+    ],
+    "项目管理部": [
+      {
+        "year": 2026,
+        "month": 2,
+        "mark": 86.75,
+        "result": "B"
+      }
+    ],
+    "设计管理部": [
+      {
+        "year": 2026,
+        "month": 2,
+        "mark": 86.55,
+        "result": "B"
+      }
+    ],
+    "财务部": [
+      {
+        "year": 2026,
+        "month": 2,
+        "mark": 86.48,
+        "result": "B"
+      }
+    ],
+    "党群纪检审计部": [
+      {
+        "year": 2026,
+        "month": 2,
+        "mark": 86.43,
+        "result": "B"
+      }
+    ],
+    "造价合约部": [
+      {
+        "year": 2026,
+        "month": 2,
+        "mark": 86.35,
+        "result": "B"
+      }
+    ],
+    "质量安全部": [
+      {
+        "year": 2026,
+        "month": 2,
+        "mark": 85.8,
+        "result": "B"
+      }
+    ],
+    "资产管理部": [
+      {
+        "year": 2026,
+        "month": 2,
+        "mark": 85.15,
+        "result": "B"
+      }
+    ]
+  },
+  "people": {
+    "陈媛": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "物业分公司",
+        "type": "manager",
+        "mark": 91.8,
+        "result": "B"
+      }
+    ],
+    "孙安娜": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "manager",
+        "mark": 84.5,
+        "result": "B"
+      }
+    ],
+    "胡彩仙": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "综合办公室",
+        "type": "manager",
+        "mark": 84.9,
+        "result": "B"
+      }
+    ],
+    "陈晔龙": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "投资拓展部",
+        "type": "manager",
+        "mark": 84.5,
+        "result": "B"
+      }
+    ],
+    "蔡震空": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "项目管理部",
+        "type": "manager",
+        "mark": 84.8,
+        "result": "B"
+      }
+    ],
+    "陈杰": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "造价合约部",
+        "type": "manager",
+        "mark": 84.7,
+        "result": "B"
+      }
+    ],
+    "林晓燕": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "物业分公司",
+        "type": "employee",
+        "mark": 89.6,
+        "result": "A"
+      }
+    ],
+    "林小森": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "物业分公司",
+        "type": "employee",
+        "mark": 88.6,
+        "result": "B"
+      }
+    ],
+    "林大江": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "物业分公司",
+        "type": "employee",
+        "mark": 86.6,
+        "result": "B"
+      }
+    ],
+    "钱源": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "物业分公司",
+        "type": "employee",
+        "mark": 86.6,
+        "result": "B"
+      }
+    ],
+    "王子妍": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "物业分公司",
+        "type": "employee",
+        "mark": 85.6,
+        "result": "B"
+      }
+    ],
+    "肖炜萍": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "物业分公司",
+        "type": "employee",
+        "mark": 84.6,
+        "result": "B"
+      }
+    ],
+    "高彬": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 90.0,
+        "result": "A"
+      }
+    ],
+    "陈南钟": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 88.0,
+        "result": "B"
+      }
+    ],
+    "林强": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 88.0,
+        "result": "B"
+      }
+    ],
+    "陈胜华": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 88.0,
+        "result": "B"
+      }
+    ],
+    "李缘媛": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 88.0,
+        "result": "B"
+      }
+    ],
+    "陈起颂": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 87.0,
+        "result": "B"
+      }
+    ],
+    "薛来煌": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 87.0,
+        "result": "B"
+      }
+    ],
+    "陈泽": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 87.0,
+        "result": "B"
+      }
+    ],
+    "陈秀榕": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 87.0,
+        "result": "B"
+      }
+    ],
+    "林鹏飞": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 86.0,
+        "result": "B"
+      }
+    ],
+    "盖程伊": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 86.0,
+        "result": "B"
+      }
+    ],
+    "王晖": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 86.0,
+        "result": "B"
+      }
+    ],
+    "林功": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 85.0,
+        "result": "B"
+      }
+    ],
+    "许仁捷": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "高新分公司",
+        "type": "employee",
+        "mark": 85.0,
+        "result": "B"
+      }
+    ],
+    "阮薇": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "综合办公室",
+        "type": "employee",
+        "mark": 89.8,
+        "result": "A"
+      }
+    ],
+    "黄敏": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "综合办公室",
+        "type": "employee",
+        "mark": 88.8,
+        "result": "B"
+      }
+    ],
+    "郭晓惠": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "综合办公室",
+        "type": "employee",
+        "mark": 87.8,
+        "result": "B"
+      }
+    ],
+    "潘朝亮": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "综合办公室",
+        "type": "employee",
+        "mark": 87.8,
+        "result": "B"
+      }
+    ],
+    "江华": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "综合办公室",
+        "type": "employee",
+        "mark": 87.4,
+        "result": "B"
+      }
+    ],
+    "高鹤鸣": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "综合办公室",
+        "type": "employee",
+        "mark": 86.8,
+        "result": "B"
+      }
+    ],
+    "蒋菲菲": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "综合办公室",
+        "type": "employee",
+        "mark": 85.8,
+        "result": "B"
+      }
+    ],
+    "陈心亮": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "投资拓展部",
+        "type": "employee",
+        "mark": 89.0,
+        "result": "A"
+      }
+    ],
+    "张彬倩": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "投资拓展部",
+        "type": "employee",
+        "mark": 89.0,
+        "result": "B"
+      }
+    ],
+    "胡世伟": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "投资拓展部",
+        "type": "employee",
+        "mark": 87.0,
+        "result": "B"
+      }
+    ],
+    "鲜卓曦": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "投资拓展部",
+        "type": "employee",
+        "mark": 86.0,
+        "result": "B"
+      }
+    ],
+    "郑春鑫": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "项目管理部",
+        "type": "employee",
+        "mark": 90.0,
+        "result": "B"
+      }
+    ],
+    "陈世杰": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "项目管理部",
+        "type": "employee",
+        "mark": 89.0,
+        "result": "B"
+      }
+    ],
+    "林敬楠": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "项目管理部",
+        "type": "employee",
+        "mark": 88.6,
+        "result": "B"
+      }
+    ],
+    "兰枫": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "项目管理部",
+        "type": "employee",
+        "mark": 88.6,
+        "result": "B"
+      }
+    ],
+    "林奇星": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "项目管理部",
+        "type": "employee",
+        "mark": 87.6,
+        "result": "B"
+      }
+    ],
+    "黄杰": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "项目管理部",
+        "type": "employee",
+        "mark": 86.6,
+        "result": "B"
+      }
+    ],
+    "鲍长杰": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "项目管理部",
+        "type": "employee",
+        "mark": 86.6,
+        "result": "B"
+      }
+    ],
+    "李柏洋": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "项目管理部",
+        "type": "employee",
+        "mark": 85.6,
+        "result": "B"
+      }
+    ],
+    "邓越": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "项目管理部",
+        "type": "employee",
+        "mark": 84.6,
+        "result": "B"
+      }
+    ],
+    "谭圆": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "设计管理部",
+        "type": "employee",
+        "mark": 88.0,
+        "result": "A"
+      }
+    ],
+    "郑长健": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "设计管理部",
+        "type": "employee",
+        "mark": 86.0,
+        "result": "B"
+      }
+    ],
+    "赵朕昕": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "设计管理部",
+        "type": "employee",
+        "mark": 85.0,
+        "result": "B"
+      }
+    ],
+    "魏琳": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "财务部",
+        "type": "employee",
+        "mark": 83.4,
+        "result": "A"
+      }
+    ],
+    "林萱": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "财务部",
+        "type": "employee",
+        "mark": 83.2,
+        "result": "B"
+      }
+    ],
+    "庄萍萍": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "财务部",
+        "type": "employee",
+        "mark": 82.0,
+        "result": "B"
+      }
+    ],
+    "刘燕": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "财务部",
+        "type": "employee",
+        "mark": 79.9,
+        "result": "B"
+      }
+    ],
+    "陈佳欐": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "党群纪检审计部",
+        "type": "employee",
+        "mark": 89.4,
+        "result": "A"
+      }
+    ],
+    "陈宗钰": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "党群纪检审计部",
+        "type": "employee",
+        "mark": 87.8,
+        "result": "B"
+      }
+    ],
+    "仇静凯": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "党群纪检审计部",
+        "type": "employee",
+        "mark": 87.4,
+        "result": "B"
+      }
+    ],
+    "张琪": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "党群纪检审计部",
+        "type": "employee",
+        "mark": 83.8,
+        "result": "B"
+      }
+    ],
+    "华海金": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "造价合约部",
+        "type": "employee",
+        "mark": 90.4,
+        "result": "A"
+      }
+    ],
+    "陈文君": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "造价合约部",
+        "type": "employee",
+        "mark": 89.4,
+        "result": "B"
+      }
+    ],
+    "陈颖": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "造价合约部",
+        "type": "employee",
+        "mark": 88.4,
+        "result": "B"
+      }
+    ],
+    "张荣": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "质量安全部",
+        "type": "employee",
+        "mark": 91.0,
+        "result": "A"
+      }
+    ],
+    "陈培伦": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "质量安全部",
+        "type": "employee",
+        "mark": 89.0,
+        "result": "B"
+      }
+    ],
+    "林兆荣": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "质量安全部",
+        "type": "employee",
+        "mark": 88.0,
+        "result": "B"
+      }
+    ],
+    "陈锟": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "质量安全部",
+        "type": "employee",
+        "mark": 87.0,
+        "result": "B"
+      }
+    ],
+    "林文志": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "资产管理部",
+        "type": "employee",
+        "mark": 91.6,
+        "result": "A"
+      }
+    ],
+    "李晨飞": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "资产管理部",
+        "type": "employee",
+        "mark": 90.6,
+        "result": "B"
+      }
+    ],
+    "郑浠冰": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "资产管理部",
+        "type": "employee",
+        "mark": 89.6,
+        "result": "B"
+      }
+    ],
+    "吴诗翌": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "资产管理部",
+        "type": "employee",
+        "mark": 89.0,
+        "result": "B"
+      }
+    ],
+    "郑思": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "资产管理部",
+        "type": "employee",
+        "mark": 88.6,
+        "result": "B"
+      }
+    ],
+    "卓喆": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "资产管理部",
+        "type": "employee",
+        "mark": 88.2,
+        "result": "B"
+      }
+    ],
+    "林丽英": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "资产管理部",
+        "type": "employee",
+        "mark": 87.6,
+        "result": "B"
+      }
+    ],
+    "朱飞": [
+      {
+        "year": 2026,
+        "month": 2,
+        "office": "资产管理部",
+        "type": "employee",
+        "mark": 87.0,
+        "result": "B"
+      }
+    ]
+  }
+}

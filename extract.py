@@ -12,10 +12,8 @@ from openpyxl import load_workbook
 
 FILE_PATTERN = re.compile(r"^(\d{4})年(\d{1,2})月一线考核.*\.xlsx$")
 
-# Normalise names that contain extra whitespace (e.g. "陈  杰" → "陈杰")
 _WHITESPACE = re.compile(r"\s+")
 
-# Map variant office names to a canonical form
 _OFFICE_ALIASES = {
     "高新区分公司": "高新分公司",
 }
@@ -126,8 +124,8 @@ def extract_all(data_dir):
     """Read every matching Excel file in *data_dir* and return a dict ready
     for JSON serialisation."""
 
-    office_scores = {}   # office -> [{year, month, mark, result}]
-    people = {}          # person_name -> [{year, month, office, type, mark, result}]
+    office_scores = {}
+    people = {}
     files_processed = []
 
     for fname in sorted(os.listdir(data_dir)):
@@ -147,14 +145,12 @@ def extract_all(data_dir):
             continue
 
         try:
-            # Department-level scores
             for rec in _extract_dept_eval(wb):
                 office_scores.setdefault(rec["office"], []).append({
                     "year": year, "month": month,
                     "mark": rec["mark"], "result": rec["result"],
                 })
 
-            # Managers
             for rec in _extract_mgmt(wb):
                 people.setdefault(rec["name"], []).append({
                     "year": year, "month": month,
@@ -163,7 +159,6 @@ def extract_all(data_dir):
                     "mark": rec["mark"], "result": rec["result"],
                 })
 
-            # Employees
             for rec in _extract_employees(wb):
                 people.setdefault(rec["name"], []).append({
                     "year": year, "month": month,
@@ -196,6 +191,6 @@ def run(data_dir, out_path):
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(here, "..", "data")
+    data_dir = os.path.join(here, "data")
     out_path = os.path.join(here, "performance_data.json")
     run(data_dir, out_path)

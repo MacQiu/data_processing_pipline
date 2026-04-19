@@ -23,8 +23,34 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    padding: 2rem 1rem;
+    padding: 0;
   }
+
+  /* ---------- Nav bar ---------- */
+  .top-nav {
+    display: flex; align-items: center; gap: 0;
+    background: var(--card);
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    padding: 0 1.5rem;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .top-nav a {
+    text-decoration: none;
+    padding: .85rem 1.4rem;
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    transition: color .2s, border-color .2s;
+  }
+  .top-nav a:hover { color: var(--text); }
+  .top-nav a.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
+  /* ---------- Page content ---------- */
+  .page-body { padding: 2rem 1rem; }
   .container { max-width: 820px; margin: 0 auto; }
   h1 {
     text-align: center;
@@ -38,7 +64,6 @@
     margin-bottom: 2rem;
   }
 
-  /* Target file card */
   .target-card {
     background: var(--card);
     border-radius: 12px;
@@ -49,7 +74,6 @@
   }
   .target-card h2 { font-size: 1.1rem; margin-bottom: .8rem; }
 
-  /* Section cards */
   .card {
     background: var(--card);
     border-radius: 12px;
@@ -69,7 +93,6 @@
     margin-bottom: 1rem;
   }
 
-  /* File inputs */
   .file-row {
     display: flex;
     align-items: center;
@@ -105,7 +128,6 @@
     background: var(--primary-hover);
   }
 
-  /* Buttons */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -125,7 +147,6 @@
   .btn-primary:disabled { background: #a0aec0; cursor: not-allowed; }
   .btn-success { background: var(--success); color: #fff; }
 
-  /* Status messages */
   .status {
     margin-top: .6rem;
     padding: .5rem .8rem;
@@ -138,7 +159,6 @@
   .status.err { background: #f8d7da; color: #721c24; }
   .status.loading { background: #fff3cd; color: #856404; }
 
-  /* All-in-one section */
   .divider {
     text-align: center;
     color: var(--muted);
@@ -159,11 +179,17 @@
 </style>
 </head>
 <body>
+
+<nav class="top-nav">
+  <a href="/" class="active">数据处理</a>
+  <a href="/dashboard">数据看板</a>
+</nav>
+
+<div class="page-body">
 <div class="container">
   <h1>绩效考核数据处理工具</h1>
   <p class="subtitle">上传考核文件，自动处理并更新汇总表</p>
 
-  <!-- Target file -->
   <div class="target-card">
     <h2>目标文件</h2>
     <div class="file-row">
@@ -178,7 +204,6 @@
     </div>
   </div>
 
-  <!-- Section 1: Department Evaluation -->
   <div class="card">
     <h2>1. 部门绩效考核</h2>
     <p class="desc">上传部门考核评定表（普通 + 领导），计算综合评定写入「部门绩效考核」表</p>
@@ -194,7 +219,6 @@
     <div class="status" id="statusDept"></div>
   </div>
 
-  <!-- Section 2: Middle Management -->
   <div class="card">
     <h2>2. 部门副职考核</h2>
     <p class="desc">上传中层副职考核评定表，计算A/B评定写入「部门副职考核」表</p>
@@ -206,7 +230,6 @@
     <div class="status" id="statusMgmt"></div>
   </div>
 
-  <!-- Section 3: Employee Rating -->
   <div class="card">
     <h2>3. 绩效考评汇总</h2>
     <p class="desc">上传员工等级评定表，按部门排序评分并写入「绩效考评汇总表」</p>
@@ -220,7 +243,6 @@
 
   <div class="divider">或者一次性处理全部</div>
 
-  <!-- All in one -->
   <div class="card">
     <h2>一键处理全部</h2>
     <p class="desc">使用上方已选择的所有文件，依次处理三个表并下载结果</p>
@@ -228,14 +250,11 @@
     <div class="status" id="statusAll"></div>
   </div>
 </div>
+</div>
 
 <script>
-// Heartbeat every 30s keeps the server alive; 2-min timeout on server side
-// accommodates browser throttling background tabs to ~1 ping/min
 setInterval(() => fetch('/api/heartbeat', {method:'POST'}).catch(()=>{}), 30000);
 fetch('/api/heartbeat', {method:'POST'}).catch(()=>{});
-
-// Actively tell the server to shut down when the tab/window is closed
 window.addEventListener('beforeunload', () => {
   navigator.sendBeacon('/api/shutdown');
 });

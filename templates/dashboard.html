@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>绩效考核数据看板</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --card: #ffffff;
+    --primary: #4361ee;
+    --primary-hover: #3a56d4;
+    --success: #2ec4b6;
+    --danger: #e63946;
+    --text: #2b2d42;
+    --muted: #8d99ae;
+    --border: #dee2e6;
+    --shadow: 0 2px 12px rgba(0,0,0,.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ---------- Nav bar ---------- */
+  .top-nav {
+    display: flex; align-items: center; gap: 0;
+    background: var(--card);
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    padding: 0 1.5rem;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .top-nav a {
+    text-decoration: none;
+    padding: .85rem 1.4rem;
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    transition: color .2s, border-color .2s;
+  }
+  .top-nav a:hover { color: var(--text); }
+  .top-nav a.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
+  /* ---------- Page content ---------- */
+  .page-body { padding: 2rem 1rem; }
+  .container { max-width: 960px; margin: 0 auto; }
+
+  h1 { text-align: center; font-size: 1.6rem; margin-bottom: .4rem; }
+  .subtitle {
+    text-align: center; color: var(--muted);
+    font-size: .9rem; margin-bottom: 2rem;
+  }
+
+  .card {
+    background: var(--card); border-radius: 12px;
+    padding: 1.5rem; box-shadow: var(--shadow);
+    margin-bottom: 1.25rem;
+  }
+  .card h2 { font-size: 1.05rem; margin-bottom: .8rem; }
+
+  .filter-row {
+    display: flex; align-items: center; gap: .75rem;
+    flex-wrap: wrap; margin-bottom: .6rem;
+  }
+  .filter-row label {
+    min-width: 80px; font-size: .88rem; font-weight: 500;
+  }
+  select, .btn {
+    font-family: inherit; font-size: .88rem;
+    padding: .45rem .7rem; border-radius: 6px;
+  }
+  select {
+    border: 1px solid var(--border); background: #fafbfc;
+    color: var(--text); min-width: 120px;
+  }
+  select:disabled { opacity: .5; cursor: not-allowed; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: .4rem;
+    border: none; font-weight: 600; cursor: pointer;
+    transition: background .2s, transform .1s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-danger  { background: var(--danger); color: #fff; }
+  .btn-danger:hover  { background: #d32f3f; }
+  .btn-sm { padding: .35rem .8rem; font-size: .82rem; }
+
+  .status {
+    margin-top: .6rem; padding: .5rem .8rem;
+    border-radius: 6px; font-size: .85rem; display: none;
+  }
+  .status.show { display: block; }
+  .status.ok  { background: #d4edda; color: #155724; }
+  .status.err { background: #f8d7da; color: #721c24; }
+  .status.loading { background: #fff3cd; color: #856404; }
+
+  .charts-wrap {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  .chart-box {
+    background: var(--card); border-radius: 12px;
+    padding: 1.25rem; box-shadow: var(--shadow);
+    position: relative;
+  }
+  .chart-box h3 {
+    font-size: .95rem; margin-bottom: .6rem; text-align: center;
+  }
+  .chart-box canvas { width: 100% !important; }
+
+  .detail-table {
+    width: 100%; border-collapse: collapse; margin-top: 1rem;
+    font-size: .85rem;
+  }
+  .detail-table th, .detail-table td {
+    padding: .45rem .6rem; border: 1px solid var(--border); text-align: center;
+  }
+  .detail-table th { background: #f8f9fa; font-weight: 600; }
+  .detail-table tr:hover { background: #f1f3f5; }
+
+  .person-label {
+    display: inline-block; padding: .15rem .5rem; border-radius: 4px;
+    font-size: .75rem; font-weight: 600; margin-left: .4rem;
+  }
+  .person-label.manager { background: #dbeafe; color: #1e40af; }
+  .person-label.employee { background: #dcfce7; color: #166534; }
+
+  .empty-state {
+    text-align: center; color: var(--muted);
+    padding: 3rem 1rem; font-size: .95rem;
+  }
+
+  @media (max-width: 700px) {
+    .charts-wrap { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="/">数据处理</a>
+  <a href="/dashboard" class="active">数据看板</a>
+</nav>
+
+<div class="page-body">
+<div class="container">
+  <h1>绩效考核数据看板</h1>
+  <p class="subtitle">查看员工与管理人员的历史考核趋势</p>
+
+  <!-- Filters -->
+  <div class="card">
+    <h2>筛选条件</h2>
+
+    <div class="filter-row">
+      <label>起始月份</label>
+      <select id="startMonth"></select>
+      <label style="min-width:auto; margin-left:.5rem;">截止月份</label>
+      <select id="endMonth"></select>
+    </div>
+
+    <div class="filter-row">
+      <label>部门/办公室</label>
+      <select id="officeSelect" disabled>
+        <option value="">-- 请先选择时间 --</option>
+      </select>
+    </div>
+
+    <div class="filter-row">
+      <label>人员</label>
+      <select id="personSelect" disabled>
+        <option value="">-- 请先选择部门 --</option>
+      </select>
+    </div>
+
+    <div style="margin-top:.8rem; display:flex; gap:.6rem; align-items:center; flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="refreshData()">刷新数据源</button>
+      <button class="btn btn-danger btn-sm" onclick="clearData()">清空数据</button>
+      <div class="status" id="refreshStatus"></div>
+    </div>
+  </div>
+
+  <!-- Upload -->
+  <div class="card">
+    <h2>上传考核文件</h2>
+    <div class="filter-row">
+      <label>选择文件</label>
+      <input type="file" id="uploadFiles" accept=".xlsx" multiple
+             style="flex:1; min-width:200px; font-size:.85rem; padding:.35rem;
+                    border:1px solid var(--border); border-radius:6px; background:#fafbfc;">
+      <button class="btn btn-primary btn-sm" onclick="uploadFiles()">上传</button>
+    </div>
+    <div class="status" id="uploadStatus"></div>
+  </div>
+
+  <!-- Charts area -->
+  <div id="chartsArea" style="display:none;">
+    <div class="charts-wrap">
+      <div class="chart-box">
+        <h3 id="barTitle">月度得分</h3>
+        <canvas id="barChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3 id="pieTitle">评定结果分布</h3>
+        <canvas id="pieChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1.25rem;">
+      <h2>明细数据</h2>
+      <table class="detail-table">
+        <thead>
+          <tr>
+            <th>月份</th>
+            <th>部门</th>
+            <th>身份</th>
+            <th>得分</th>
+            <th>评定结果</th>
+          </tr>
+        </thead>
+        <tbody id="detailBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="emptyState" class="empty-state">请选择时间范围、部门和人员以查看数据</div>
+</div>
+</div>
+
+<script>
+let barChart = null;
+let pieChart = null;
+
+const $start   = document.getElementById('startMonth');
+const $end     = document.getElementById('endMonth');
+const $office  = document.getElementById('officeSelect');
+const $person  = document.getElementById('personSelect');
+const $charts  = document.getElementById('chartsArea');
+const $empty   = document.getElementById('emptyState');
+
+setInterval(() => fetch('/api/heartbeat', {method:'POST'}).catch(()=>{}), 30000);
+fetch('/api/heartbeat', {method:'POST'}).catch(()=>{});
+
+function ymLabel(y, m) {
+  return `${y}-${String(m).padStart(2, '0')}`;
+}
+
+function setStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'status show ' + type;
+  el.textContent = msg;
+}
+
+const TYPE_LABELS = { manager: '副职管理人员', employee: '员工', department: '部门' };
+
+async function loadTimeRange() {
+  const resp = await fetch('/api/time-range');
+  const data = await resp.json();
+  const months = data.months || [];
+
+  $start.innerHTML = '';
+  $end.innerHTML = '';
+
+  if (months.length === 0) {
+    $start.innerHTML = '<option value="">无数据</option>';
+    $end.innerHTML   = '<option value="">无数据</option>';
+    return;
+  }
+
+  months.forEach(({year, month}) => {
+    const val = ymLabel(year, month);
+    const label = `${year}年${month}月`;
+    $start.innerHTML += `<option value="${val}">${label}</option>`;
+    $end.innerHTML   += `<option value="${val}">${label}</option>`;
+  });
+
+  $end.value = $end.options[$end.options.length - 1].value;
+
+  await loadOffices();
+}
+
+async function loadOffices() {
+  const start = $start.value;
+  const end   = $end.value;
+  if (!start || !end) return;
+
+  const prevOffice = $office.value;
+
+  const resp = await fetch(`/api/offices?start=${start}&end=${end}`);
+  const data = await resp.json();
+
+  $office.innerHTML = '<option value="">-- 选择部门 --</option>';
+  (data.offices || []).forEach(o => {
+    $office.innerHTML += `<option value="${o}">${o}</option>`;
+  });
+  $office.disabled = false;
+
+  if (prevOffice && [...$office.options].some(o => o.value === prevOffice)) {
+    $office.value = prevOffice;
+    await loadPeople();
+  } else {
+    $person.innerHTML = '<option value="">-- 请先选择部门 --</option>';
+    $person.disabled = true;
+    hideCharts();
+  }
+}
+
+async function loadOfficeData() {
+  const office = $office.value;
+  if (!office) { hideCharts(); return; }
+
+  const start = $start.value;
+  const end   = $end.value;
+  const resp  = await fetch(`/api/office/${encodeURIComponent(office)}?start=${start}&end=${end}`);
+  if (!resp.ok) { hideCharts(); return; }
+
+  const data = await resp.json();
+  renderCharts(data);
+}
+
+async function loadPeople() {
+  const office = $office.value;
+  if (!office) {
+    $person.innerHTML = '<option value="">-- 请先选择部门 --</option>';
+    $person.disabled = true;
+    hideCharts();
+    return;
+  }
+
+  const prevPerson = $person.value;
+
+  const start = $start.value;
+  const end   = $end.value;
+  const resp  = await fetch(`/api/people?office=${encodeURIComponent(office)}&start=${start}&end=${end}`);
+  const data  = await resp.json();
+
+  $person.innerHTML = '<option value="">-- 查看部门整体 --</option>';
+  (data.people || []).forEach(p => {
+    const tag = p.type === 'manager' ? ' [副职]' : '';
+    $person.innerHTML += `<option value="${p.name}" data-type="${p.type}">${p.name}${tag}</option>`;
+  });
+  $person.disabled = false;
+
+  if (prevPerson && [...$person.options].some(o => o.value === prevPerson)) {
+    $person.value = prevPerson;
+    await loadPerson();
+  } else {
+    await loadOfficeData();
+  }
+}
+
+async function loadPerson() {
+  const name = $person.value;
+  if (!name) { await loadOfficeData(); return; }
+
+  const start = $start.value;
+  const end   = $end.value;
+  const resp  = await fetch(`/api/person/${encodeURIComponent(name)}?start=${start}&end=${end}`);
+  if (!resp.ok) { hideCharts(); return; }
+
+  const data = await resp.json();
+  renderCharts(data);
+}
+
+const BAR_COLORS = 'rgba(67, 97, 238, 0.7)';
+const BAR_BORDER = 'rgba(67, 97, 238, 1)';
+const PIE_COLORS = ['#22c55e', '#3b82f6', '#ef4444'];
+
+function renderCharts(data) {
+  $charts.style.display = '';
+  $empty.style.display  = 'none';
+
+  document.getElementById('barTitle').textContent = `${data.name} — 月度得分`;
+  document.getElementById('pieTitle').textContent = `${data.name} — 评定结果分布`;
+
+  if (barChart) barChart.destroy();
+  barChart = new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: data.labels,
+      datasets: [{
+        label: '得分',
+        data: data.marks,
+        backgroundColor: BAR_COLORS,
+        borderColor: BAR_BORDER,
+        borderWidth: 1,
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: false, suggestedMin: 60, suggestedMax: 100 },
+      },
+    },
+  });
+
+  const rc = data.result_counts;
+  const pieLabels = [];
+  const pieData   = [];
+  const pieColors = [];
+  if (rc.A) { pieLabels.push('A'); pieData.push(rc.A); pieColors.push(PIE_COLORS[0]); }
+  if (rc.B) { pieLabels.push('B'); pieData.push(rc.B); pieColors.push(PIE_COLORS[1]); }
+  if (rc.C) { pieLabels.push('C'); pieData.push(rc.C); pieColors.push(PIE_COLORS[2]); }
+
+  if (pieChart) pieChart.destroy();
+  pieChart = new Chart(document.getElementById('pieChart'), {
+    type: 'pie',
+    data: {
+      labels: pieLabels,
+      datasets: [{
+        data: pieData,
+        backgroundColor: pieColors,
+        borderWidth: 2,
+        borderColor: '#fff',
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.label}: ${ctx.raw} 次`,
+          },
+        },
+      },
+    },
+  });
+
+  const tbody = document.getElementById('detailBody');
+  tbody.innerHTML = '';
+  (data.details || []).forEach(d => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${d.month}</td>
+      <td>${d.office}</td>
+      <td>${TYPE_LABELS[d.type] || d.type}</td>
+      <td>${d.mark ?? '-'}</td>
+      <td>${d.result ?? '-'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function hideCharts() {
+  $charts.style.display = 'none';
+  $empty.style.display  = '';
+}
+
+async function refreshData() {
+  setStatus('refreshStatus', 'loading', '正在重新读取Excel文件…');
+  try {
+    const resp = await fetch('/api/refresh', { method: 'POST' });
+    const data = await resp.json();
+    if (data.ok) {
+      setStatus('refreshStatus', 'ok',
+        `刷新完成：${data.files.length} 个文件，${data.people_count} 人`);
+      await loadTimeRange();
+    } else {
+      setStatus('refreshStatus', 'err', '刷新失败：' + data.error);
+    }
+  } catch (e) {
+    setStatus('refreshStatus', 'err', '网络错误：' + e.message);
+  }
+}
+
+async function clearData() {
+  if (!confirm('确定要清空所有数据文件吗？此操作不可撤销。')) return;
+  setStatus('refreshStatus', 'loading', '正在清空数据…');
+  try {
+    const resp = await fetch('/api/clear', { method: 'POST' });
+    const data = await resp.json();
+    if (data.ok) {
+      setStatus('refreshStatus', 'ok', `已清空 ${data.removed} 个文件`);
+      await loadTimeRange();
+    } else {
+      setStatus('refreshStatus', 'err', '清空失败：' + data.error);
+    }
+  } catch (e) {
+    setStatus('refreshStatus', 'err', '网络错误：' + e.message);
+  }
+}
+
+async function uploadFiles() {
+  const input = document.getElementById('uploadFiles');
+  const files = input.files;
+  if (!files.length) { setStatus('uploadStatus', 'err', '请先选择文件'); return; }
+
+  const fd = new FormData();
+  for (const f of files) fd.append('files', f);
+
+  setStatus('uploadStatus', 'loading', '正在上传并处理…');
+  try {
+    const resp = await fetch('/api/upload', { method: 'POST', body: fd });
+    const data = await resp.json();
+    if (data.ok) {
+      setStatus('uploadStatus', 'ok',
+        `上传成功：${data.uploaded.length} 个文件。共 ${data.files_count} 个文件，${data.people_count} 人`);
+      input.value = '';
+      await loadTimeRange();
+    } else {
+      setStatus('uploadStatus', 'err', '上传失败：' + data.error);
+    }
+  } catch (e) {
+    setStatus('uploadStatus', 'err', '网络错误：' + e.message);
+  }
+}
+
+$start.addEventListener('change', loadOffices);
+$end.addEventListener('change', loadOffices);
+$office.addEventListener('change', loadPeople);
+$person.addEventListener('change', loadPerson);
+
+loadTimeRange();
+</script>
+</body>
+</html>

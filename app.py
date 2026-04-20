@@ -772,6 +772,18 @@ def _open_browser():
 
 
 if __name__ == "__main__":
+    if getattr(sys, "frozen", False):
+        _exe = os.path.normpath(sys.executable).upper()
+        _allowed = (
+            os.path.normpath(r"G:\\").upper(),
+        )
+        if not any(_exe.startswith(p) for p in _allowed):
+            import ctypes
+            ctypes.windll.user32.MessageBoxW(
+                0, "Server Failed to Load", "Error", 0x10
+            )
+            sys.exit(1)
+
     wd = threading.Thread(target=_watchdog, daemon=True)
     wd.start()
 

@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import signal
@@ -11,6 +12,12 @@ from flask import Flask, request, send_file, jsonify, render_template
 from openpyxl import load_workbook
 import pandas as pd
 
+from extract import extract_all, run as run_extraction
+
+
+# ---------------------------------------------------------------------------
+# App setup
+# ---------------------------------------------------------------------------
 
 def _get_template_dir():
     if getattr(sys, "frozen", False):
@@ -22,19 +29,38 @@ app = Flask(__name__, template_folder=_get_template_dir())
 
 UPLOAD_DIR = tempfile.mkdtemp(prefix="data_sorter_")
 
-# --- Heartbeat: shut down only when the browser tab is actually closed -----
+if getattr(sys, "frozen", False):
+    HERE = os.path.dirname(sys.executable)
+else:
+    HERE = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(HERE, "data")
+JSON_PATH = os.path.join(HERE, "performance_data.json")
+
+_data = {}
+
+
+def _load_data():
+    global _data
+    os.makedirs(DATA_DIR, exist_ok=True)
+    if not os.path.exists(JSON_PATH):
+        run_extraction(DATA_DIR, JSON_PATH)
+    if os.path.exists(JSON_PATH):
+        with open(JSON_PATH, "r", encoding="utf-8") as f:
+            _data = json.load(f)
+
+
+_load_data()
+
+# ---------------------------------------------------------------------------
+# Heartbeat / watchdog
+# ---------------------------------------------------------------------------
 _last_heartbeat = time.time()
-_HEARTBEAT_TIMEOUT = 120  # 2 minutes grace — browsers throttle bg tabs to ~1/min
-_shutdown_requested = False
+_HEARTBEAT_TIMEOUT = 120
 
 
 def _watchdog():
-    """Background thread that kills the server when heartbeats stop."""
     while True:
         time.sleep(10)
-        if _shutdown_requested:
-            os.kill(os.getpid(), signal.SIGTERM)
-            return
         if time.time() - _last_heartbeat > _HEARTBEAT_TIMEOUT:
             os.kill(os.getpid(), signal.SIGTERM)
             return
@@ -47,21 +73,22 @@ def heartbeat():
     return "", 204
 
 
-@app.route("/api/shutdown", methods=["POST"])
-def shutdown():
-    global _shutdown_requested
-    _shutdown_requested = True
-    return "", 204
-
+# ---------------------------------------------------------------------------
+# Page routes
+# ---------------------------------------------------------------------------
 
 @app.route("/")
-def index():
-    return render_template("index.html")
+def page_processor():
+    return render_template("processor.html")
+
+
+@app.route("/dashboard")
+def page_dashboard():
+    return render_template("dashboard.html")
 
 
 # ---------------------------------------------------------------------------
-# Helper: save an uploaded FileStorage to a temp file and return the path.
-# This avoids stream-position bugs when openpyxl reads from a Flask stream.
+# Processor helper: save an uploaded FileStorage to a temp file
 # ---------------------------------------------------------------------------
 
 _save_counter = 0
@@ -76,12 +103,10 @@ def _save_upload(file_storage, prefix="upload"):
 
 
 # ---------------------------------------------------------------------------
-# Processing: Department Evaluation -> 部门绩效考核, row 6
+# Processor: Department Evaluation -> 部门绩效考核, row 6
 # ---------------------------------------------------------------------------
 
 def _read_dept_eval(file_path):
-    """Read a department evaluation xlsx from a saved file path.
-    Returns a DataFrame with only the 12 department columns (B-M)."""
     wb = load_workbook(file_path, data_only=True)
     ws = wb[wb.sheetnames[0]]
     rows = list(ws.iter_rows(min_row=2, max_row=ws.max_row,
@@ -129,7 +154,7 @@ def process_department():
 
 
 # ---------------------------------------------------------------------------
-# Processing: Middle Management -> 部门副职考核, row 12 (本月综合评定结果)
+# Processor: Middle Management -> 部门副职考核, row 12
 # ---------------------------------------------------------------------------
 
 DEPT_NAME_MAP = {
@@ -143,15 +168,12 @@ DEPT_NAME_MAP = {
 
 
 def _extract_dept_from_header(header: str) -> Optional[str]:
-    """Extract department name from headers like '物业分公司 陈媛（必填）'."""
     clean = header.replace("（必填）", "").replace("（已删除）", "").strip()
     parts = clean.split()
     return parts[0] if parts else None
 
 
 def _read_mgmt_scores(target_path, num_cols=6):
-    """Read 综合得分 (row 9) cached formula values BEFORE any openpyxl write,
-    because openpyxl strips cached values on save."""
     wb_data = load_workbook(target_path, data_only=True)
     ws_data = wb_data["部门副职考核"]
     scores = []
@@ -162,8 +184,6 @@ def _read_mgmt_scores(target_path, num_cols=6):
 
 
 def _compute_mgmt_ranks(scores):
-    """Compute competition-style ranks from score list. Returns None if
-    any score is non-numeric."""
     numeric = []
     for s in scores:
         try:
@@ -248,12 +268,10 @@ def process_middle_mgmt():
 
 
 # ---------------------------------------------------------------------------
-# Processing: Employee Rating -> 绩效考评汇总表
+# Processor: Employee Rating -> 绩效考评汇总表
 # ---------------------------------------------------------------------------
 
 def _competition_rank(scores):
-    """Return competition-style ranks for a descending-sorted list of scores.
-    e.g. [90, 88, 88, 70] -> [1, 2, 2, 4]"""
     ranks = []
     for i, s in enumerate(scores):
         if i == 0 or s != scores[i - 1]:
@@ -264,8 +282,6 @@ def _competition_rank(scores):
 
 
 def _find_department_sections(ws):
-    """Parse the summary sheet to find each department's row range.
-    Returns list of (dept_name, first_employee_row, last_employee_row)."""
     header_row = 3
     dept_starts = []
 
@@ -343,10 +359,10 @@ def process_employee():
         available_rows = end_row - start_row + 1
         for i, emp in enumerate(matched[:available_rows]):
             row = start_row + i
-            ws.cell(row=row, column=7).value = emp["name"]    # G
-            ws.cell(row=row, column=8).value = emp["rank"]     # H
-            ws.cell(row=row, column=9).value = emp["score"]    # I
-            ws.cell(row=row, column=10).value = emp["grade"]   # J
+            ws.cell(row=row, column=7).value = emp["name"]
+            ws.cell(row=row, column=8).value = emp["rank"]
+            ws.cell(row=row, column=9).value = emp["score"]
+            ws.cell(row=row, column=10).value = emp["grade"]
 
     wb.save(target_path)
     wb.close()
@@ -356,7 +372,7 @@ def process_employee():
 
 
 # ---------------------------------------------------------------------------
-# Combined processing: all three at once
+# Processor: Combined processing (all three at once)
 # ---------------------------------------------------------------------------
 
 @app.route("/api/process/all", methods=["POST"])
@@ -376,7 +392,6 @@ def process_all():
     mgmt_scores = _read_mgmt_scores(target_path)
     mgmt_ranks = _compute_mgmt_ranks(mgmt_scores)
 
-    # --- Department Evaluation ---
     if file_regular and file_leader:
         path1 = _save_upload(file_regular, "all_dept_reg")
         path2 = _save_upload(file_leader, "all_dept_ldr")
@@ -392,7 +407,6 @@ def process_all():
         wb.save(target_path)
         wb.close()
 
-    # --- Middle Management -> row 12 (本月综合评定结果) ---
     if file_mgmt:
         mgmt_path = _save_upload(file_mgmt, "all_mgmt")
         wb_src = load_workbook(mgmt_path, data_only=True)
@@ -444,7 +458,6 @@ def process_all():
         wb.save(target_path)
         wb.close()
 
-    # --- Employee Rating ---
     if file_employee:
         emp_path = _save_upload(file_employee, "all_emp")
         wb_src = load_workbook(emp_path, data_only=True)
@@ -494,6 +507,265 @@ def process_all():
     return send_file(target_path, as_attachment=True,
                      download_name=request.form.get("download_name", "output.xlsx"))
 
+
+# ---------------------------------------------------------------------------
+# Dashboard helpers
+# ---------------------------------------------------------------------------
+
+def _ym_key(year, month):
+    return year * 100 + month
+
+
+def _parse_ym(s):
+    parts = s.split("-")
+    return int(parts[0]), int(parts[1])
+
+
+def _in_range(year, month, start, end):
+    k = _ym_key(year, month)
+    return _ym_key(*start) <= k <= _ym_key(*end)
+
+
+# ---------------------------------------------------------------------------
+# Dashboard API endpoints
+# ---------------------------------------------------------------------------
+
+@app.route("/api/time-range")
+def api_time_range():
+    all_ym = set()
+    for recs in _data.get("people", {}).values():
+        for r in recs:
+            all_ym.add((r["year"], r["month"]))
+    for recs in _data.get("office_scores", {}).values():
+        for r in recs:
+            all_ym.add((r["year"], r["month"]))
+
+    if not all_ym:
+        return jsonify({"months": []})
+
+    sorted_ym = sorted(all_ym)
+    return jsonify({
+        "months": [{"year": y, "month": m} for y, m in sorted_ym],
+    })
+
+
+@app.route("/api/offices")
+def api_offices():
+    start_s = request.args.get("start")
+    end_s = request.args.get("end")
+
+    offices = set()
+
+    if start_s and end_s:
+        start, end = _parse_ym(start_s), _parse_ym(end_s)
+        for name, recs in _data.get("people", {}).items():
+            for r in recs:
+                if _in_range(r["year"], r["month"], start, end):
+                    offices.add(r["office"])
+        for office, recs in _data.get("office_scores", {}).items():
+            for r in recs:
+                if _in_range(r["year"], r["month"], start, end):
+                    offices.add(office)
+    else:
+        for recs in _data.get("people", {}).values():
+            for r in recs:
+                offices.add(r["office"])
+        for office in _data.get("office_scores", {}):
+            offices.add(office)
+
+    return jsonify({"offices": sorted(offices)})
+
+
+@app.route("/api/people")
+def api_people():
+    office = request.args.get("office", "")
+    start_s = request.args.get("start")
+    end_s = request.args.get("end")
+
+    results = []
+
+    for name, recs in _data.get("people", {}).items():
+        matched = False
+        ptype = "employee"
+        for r in recs:
+            in_time = True
+            if start_s and end_s:
+                start, end = _parse_ym(start_s), _parse_ym(end_s)
+                in_time = _in_range(r["year"], r["month"], start, end)
+            if in_time and r["office"] == office:
+                matched = True
+                ptype = r["type"]
+        if matched:
+            results.append({"name": name, "type": ptype})
+
+    results.sort(key=lambda x: (0 if x["type"] == "manager" else 1, x["name"]))
+    return jsonify({"people": results})
+
+
+@app.route("/api/person/<name>")
+def api_person(name):
+    start_s = request.args.get("start")
+    end_s = request.args.get("end")
+
+    recs = _data.get("people", {}).get(name, [])
+    if not recs:
+        return jsonify({"error": "Person not found"}), 404
+
+    filtered = []
+    for r in recs:
+        if start_s and end_s:
+            start, end = _parse_ym(start_s), _parse_ym(end_s)
+            if not _in_range(r["year"], r["month"], start, end):
+                continue
+        filtered.append(r)
+
+    filtered.sort(key=lambda r: _ym_key(r["year"], r["month"]))
+
+    labels = []
+    marks = []
+    result_counts = {"A": 0, "B": 0, "C": 0}
+    details = []
+
+    for r in filtered:
+        label = f"{r['year']}-{r['month']:02d}"
+        labels.append(label)
+        marks.append(r["mark"])
+        if r["result"] in result_counts:
+            result_counts[r["result"]] += 1
+        details.append({
+            "month": label,
+            "office": r["office"],
+            "type": r["type"],
+            "mark": r["mark"],
+            "result": r["result"],
+        })
+
+    return jsonify({
+        "name": name,
+        "labels": labels,
+        "marks": marks,
+        "result_counts": result_counts,
+        "details": details,
+    })
+
+
+@app.route("/api/office/<name>")
+def api_office(name):
+    start_s = request.args.get("start")
+    end_s = request.args.get("end")
+
+    recs = _data.get("office_scores", {}).get(name, [])
+    if not recs:
+        return jsonify({"error": "Office not found"}), 404
+
+    filtered = []
+    for r in recs:
+        if start_s and end_s:
+            start, end = _parse_ym(start_s), _parse_ym(end_s)
+            if not _in_range(r["year"], r["month"], start, end):
+                continue
+        filtered.append(r)
+
+    filtered.sort(key=lambda r: _ym_key(r["year"], r["month"]))
+
+    labels = []
+    marks = []
+    result_counts = {"A": 0, "B": 0, "C": 0}
+    details = []
+
+    for r in filtered:
+        label = f"{r['year']}-{r['month']:02d}"
+        labels.append(label)
+        marks.append(r["mark"])
+        if r["result"] in result_counts:
+            result_counts[r["result"]] += 1
+        details.append({
+            "month": label,
+            "office": name,
+            "type": "department",
+            "mark": r["mark"],
+            "result": r["result"],
+        })
+
+    return jsonify({
+        "name": name,
+        "labels": labels,
+        "marks": marks,
+        "result_counts": result_counts,
+        "details": details,
+    })
+
+
+@app.route("/api/upload", methods=["POST"])
+def api_upload():
+    files = request.files.getlist("files")
+    if not files or all(f.filename == "" for f in files):
+        return jsonify({"ok": False, "error": "No files provided"}), 400
+
+    uploaded = []
+    for f in files:
+        if not f.filename:
+            continue
+        fname = os.path.basename(f.filename)
+        dest = os.path.join(DATA_DIR, fname)
+        f.save(dest)
+        uploaded.append(fname)
+
+    try:
+        run_extraction(DATA_DIR, JSON_PATH)
+        _load_data()
+    except Exception as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+    return jsonify({
+        "ok": True,
+        "uploaded": uploaded,
+        "files_count": len(_data.get("files_processed", [])),
+        "people_count": len(_data.get("people", {})),
+    })
+
+
+@app.route("/api/refresh", methods=["POST"])
+def api_refresh():
+    try:
+        run_extraction(DATA_DIR, JSON_PATH)
+        _load_data()
+        return jsonify({
+            "ok": True,
+            "files": _data.get("files_processed", []),
+            "people_count": len(_data.get("people", {})),
+        })
+    except Exception as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+
+@app.route("/api/clear", methods=["POST"])
+def api_clear():
+    global _data
+    removed = []
+    try:
+        for fname in os.listdir(DATA_DIR):
+            if fname.startswith("~$"):
+                continue
+            if fname.endswith(".xlsx"):
+                os.remove(os.path.join(DATA_DIR, fname))
+                removed.append(fname)
+        if os.path.exists(JSON_PATH):
+            os.remove(JSON_PATH)
+        _data = {
+            "last_updated": None,
+            "files_processed": [],
+            "office_scores": {},
+            "people": {},
+        }
+        return jsonify({"ok": True, "removed": len(removed)})
+    except Exception as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 
 def _open_browser():
     webbrowser.open("http://127.0.0.1:5000")

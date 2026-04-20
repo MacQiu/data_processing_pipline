@@ -29,7 +29,10 @@ app = Flask(__name__, template_folder=_get_template_dir())
 
 UPLOAD_DIR = tempfile.mkdtemp(prefix="data_sorter_")
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, "frozen", False):
+    HERE = os.path.dirname(sys.executable)
+else:
+    HERE = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(HERE, "data")
 JSON_PATH = os.path.join(HERE, "performance_data.json")
 
@@ -38,6 +41,7 @@ _data = {}
 
 def _load_data():
     global _data
+    os.makedirs(DATA_DIR, exist_ok=True)
     if not os.path.exists(JSON_PATH):
         run_extraction(DATA_DIR, JSON_PATH)
     if os.path.exists(JSON_PATH):
@@ -52,15 +56,11 @@ _load_data()
 # ---------------------------------------------------------------------------
 _last_heartbeat = time.time()
 _HEARTBEAT_TIMEOUT = 120
-_shutdown_requested = False
 
 
 def _watchdog():
     while True:
         time.sleep(10)
-        if _shutdown_requested:
-            os.kill(os.getpid(), signal.SIGTERM)
-            return
         if time.time() - _last_heartbeat > _HEARTBEAT_TIMEOUT:
             os.kill(os.getpid(), signal.SIGTERM)
             return
@@ -70,13 +70,6 @@ def _watchdog():
 def heartbeat():
     global _last_heartbeat
     _last_heartbeat = time.time()
-    return "", 204
-
-
-@app.route("/api/shutdown", methods=["POST"])
-def shutdown():
-    global _shutdown_requested
-    _shutdown_requested = True
     return "", 204
 
 

@@ -255,9 +255,6 @@
 <script>
 setInterval(() => fetch('/api/heartbeat', {method:'POST'}).catch(()=>{}), 30000);
 fetch('/api/heartbeat', {method:'POST'}).catch(()=>{});
-window.addEventListener('beforeunload', () => {
-  navigator.sendBeacon('/api/shutdown');
-});
 
 function getTarget() {
   const f = document.getElementById('targetFile').files[0];

@@ -252,7 +252,6 @@ const $empty   = document.getElementById('emptyState');
 
 setInterval(() => fetch('/api/heartbeat', {method:'POST'}).catch(()=>{}), 30000);
 fetch('/api/heartbeat', {method:'POST'}).catch(()=>{});
-window.addEventListener('beforeunload', () => navigator.sendBeacon('/api/shutdown'));
 
 function ymLabel(y, m) {
   return `${y}-${String(m).padStart(2, '0')}`;
@@ -297,6 +296,8 @@ async function loadOffices() {
   const end   = $end.value;
   if (!start || !end) return;
 
+  const prevOffice = $office.value;
+
   const resp = await fetch(`/api/offices?start=${start}&end=${end}`);
   const data = await resp.json();
 
@@ -306,9 +307,14 @@ async function loadOffices() {
   });
   $office.disabled = false;
 
-  $person.innerHTML = '<option value="">-- 请先选择部门 --</option>';
-  $person.disabled = true;
-  hideCharts();
+  if (prevOffice && [...$office.options].some(o => o.value === prevOffice)) {
+    $office.value = prevOffice;
+    await loadPeople();
+  } else {
+    $person.innerHTML = '<option value="">-- 请先选择部门 --</option>';
+    $person.disabled = true;
+    hideCharts();
+  }
 }
 
 async function loadOfficeData() {
@@ -333,6 +339,8 @@ async function loadPeople() {
     return;
   }
 
+  const prevPerson = $person.value;
+
   const start = $start.value;
   const end   = $end.value;
   const resp  = await fetch(`/api/people?office=${encodeURIComponent(office)}&start=${start}&end=${end}`);
@@ -345,7 +353,12 @@ async function loadPeople() {
   });
   $person.disabled = false;
 
-  await loadOfficeData();
+  if (prevPerson && [...$person.options].some(o => o.value === prevPerson)) {
+    $person.value = prevPerson;
+    await loadPerson();
+  } else {
+    await loadOfficeData();
+  }
 }
 
 async function loadPerson() {
